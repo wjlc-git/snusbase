@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Settings - Snusbase Beta</title>
+<link rel="stylesheet" type="text/css" href="/app.css?cv=28">
+<link rel="shortcut icon" type="image/x-icon" href="/favicon.png?cv=28">
+</head>
+<body>
+<nav class="topnav">
+<ul>
+<li><a href="/"><strong>Snusbase Beta</strong></a></li>
+<li class="disabled">|</li>
+<li><a href="/">Search</a></li>
+<li><a href="/history">History</a></li>
+<li><a href="/tools">Tools</a></li>
+</ul>
+<ul>
+<li><a href="/settings">Settings</a></li>
+</ul>
+</nav><form action="/settings" id="settings_form" method="POST">
+<div class="settings-wrapper">
+<h3>Account</h3>
+<div class="settings">
+<div class="form-group">
+<label for="code">Activation Code</label>
+<p class="info">Click "try snusbase beta" on the main snusbase.com website if you don't know what this is.</p>
+<input type="text" name="code" id="code" placeholder="sbXXXXXXXXXXXXXXXXXXXXXXXXXXXX" autocomplete="off" value="sbmeovhou6ecsn9fd9wcwnwwvsvwnc">
+</div>
+</div>
+<h3>Search</h3>
+<div class="settings">
+<div class="form-group">
+<input type="checkbox" name="save" id="save" checked=&quot;&quot;>
+<label for="save">Enable search history</label>
+<p class="info">Stores your searches using <a target="_blank" href="https://www.w3schools.com/html/html5_webstorage.asp">LocalStorage</a> so you can return to them later from the <a href="/history">history</a> page.</p>
+</div>
+</div>
+<h3>Appearance</h3>
+<div class="settings">
+<div class="form-group">
+<label for="theme">Theme</label>
+<div class="select-wrapper"><select name="theme" id="theme">
+<option value="default">System</option>
+<option value="dark">Dark</option>
+<option value="light">Light</option>
+</select></div>
+</div>
+<div class="form-group">
+<label for="collapse_at">Collapse or expand breach results</label>
+<div class="select-wrapper"><select name="collapse_at" id="collapse_at">
+<option value="false" selected="selected">Expand by default</option>
+<option value="true">Collapse by default</option>
+<option value="10">Collapse breaches with 10 or more results</option>
+<option value="25">Collapse breaches with 25 or more results</option>
+<option value="100">Collapse breaches with 100 or more results</option>
+</select></div>
+</div>
+</div>
+<br/>
+<div class="settings">
+<div class="form-group">
+<input type="submit" value="Save Settings">
+</div>
+</div>
+</div>
+</form>
+<script>
+const codeElement = document.getElementById('code');
+const formElement = document.getElementById('settings_form');
+if ((codeElement.value === '' && localStorage.getItem('snusbase_code')) || false) {
+codeElement.value = localStorage.getItem('snusbase_code');
+const hiddenInput = document.createElement('input');
+hiddenInput.setAttribute('type', 'hidden');
+hiddenInput.setAttribute('name', 'first_use');
+hiddenInput.setAttribute('value', 'true');
+formElement.appendChild(hiddenInput);
+formElement.submit();
+}
+</script>
+<script src="/app.js?cv=28"></script>
+</body>
+</html>
