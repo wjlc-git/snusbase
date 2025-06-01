@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tools - Snusbase Beta</title>
+<link rel="stylesheet" type="text/css" href="/app.css?cv=28">
+<link rel="shortcut icon" type="image/x-icon" href="/favicon.png?cv=28">
+</head>
+<body>
+<nav class="topnav">
+<ul>
+<li><a href="/"><strong>Snusbase Beta</strong></a></li>
+<li class="disabled">|</li>
+<li><a href="/">Search</a></li>
+<li><a href="/history">History</a></li>
+<li><a href="/tools">Tools</a></li>
+</ul>
+<ul>
+<li><a href="/settings">Settings</a></li>
+</ul>
+</nav><input type="hidden" name="snusbase_code" id="snusbase_code" value="sbmeovhou6ecsn9fd9wcwnwwvsvwnc"><div class="tools-wrapper">
+<noscript><div class="error">This page requires javascript to function. Please enable javascript to start making use of it.</div></noscript>
+<div class="tool" id="ip-whois">
+<h2>IP WHOIS Lookup</h2>
+<p>Get the whois data for any IP address.</p>
+<div class="form-group">
+<input type="text" name="ip-addresses" id="ip-addresses" placeholder="IP addresses, separated by comma." autocomplete="off">
+</div>
+<div class="form-group">
+<input id="ip-whois-button" type="submit" value="Search" onclick="toolsIPWhois()">
+</div>
+<div id="ip-results" class="code"></div>
+</div>
+<div class="tool" id="hash-lookup">
+<h2>Cracked Hash Lookup</h2>
+<p>Enter a hashed password, and get back their cracked, plaintext equivilents.</p>
+<div class="form-group">
+<input type="text" name="hashes" id="hashes" placeholder="Hashed passwords, separated by comma." autocomplete="off">
+</div>
+<div class="form-group">
+<input id="hash-button" type="submit" value="Search" onclick="toolsHashLookup()">
+</div>
+<div id="hash-results" class="code"></div>
+</div>
+<div class="tool" id="hash-lookup">
+<h2>Leaked Password Lookup</h2>
+<p>Enter a plaintext password, and get back the cracked, leaked hashes they were derived from.</p>
+<div class="form-group">
+<input type="text" name="passwords" id="passwords" placeholder="Plaintext passwords, separated by comma." autocomplete="off">
+</div>
+<div class="form-group">
+<input id="password-button" type="submit" value="Search" onclick="toolsPasswordLookup()">
+</div>
+<div id="password-results" class="code"></div>
+</div>
+<div class="tool" id="combo-lookup">
+<h2>Combolist Lookup</h2>
+<p>Check an email or username against large combolists.</p>
+<div class="form-group">
+<input type="text" name="combouser" id="combouser" placeholder="Email or username (one at a time)." autocomplete="off">
+</div>
+<div class="form-group">
+<input id="combo-button" type="submit" value="Search" onclick="toolsComboLookup()">
+</div>
+<div id="combo-results" class="code"></div>
+</div>
+</div>
+<script>
+const toolsFormat = (results) => {
+const resultsHtml = Object.entries(results).map(([resultKey, resultValue]) => {
+const safeResultKey = resultKey.replace(/[^a-zA-Z0-9\-_]/g, '');
+const inputId = `toggle-${safeResultKey}`;
+const dataId = `data-${safeResultKey}`;
+let keyValuesHtml = '';
+if (Array.isArray(resultValue)) {
+keyValuesHtml = resultValue.map((item) => {
+const itemHtml = Object.entries(item).map(([key, value]) => `<div>
+<span>${escapeHtml(key)}</span>
+<span>${escapeHtml(value)}</span>
+</div>`).join('');
+return `<div class="item">${itemHtml}</div>`;
+}).join('');
+} else if (typeof resultValue === 'object' && resultValue !== null) {
+keyValuesHtml = Object.entries(resultValue).map(([key, value]) => `<div><span>${escapeHtml(key)}</span><span>${escapeHtml(value)}</span></div>`);
+} else {
+keyValuesHtml = `<div><span>${escapeHtml(resultValue)}</span></div>`;
+}
+return `<div class="result">
+<input type="checkbox" data-type="ip-whois" class="result-toggle" id="${inputId}">
+<label class="result-header" for="${inputId}">
+<div>${escapeHtml(resultKey).toUpperCase()}</div>
+<div class="x-st"></div>
+</label>
+<div class="result-data" id="${dataId}">
+${typeof keyValuesHtml === 'string' ? keyValuesHtml : `<div>${keyValuesHtml.join('')}</div>`}
+</div>
+</div>`
+}).join('');
+return `<div class="results">${resultsHtml}</div>`;
+};
+const toolsIPWhois = async () => {
+const button = document.getElementById('ip-whois-button');
+button.value = 'Searching...';
+const url = `${API_BASE}/tools/ip-whois`;
+const terms = document.getElementById('ip-addresses').value.split(',').map(s => s.trim()).filter(Boolean);
+try {
+const data = await fetchAPIData(url, { terms: terms });
+if(Object.keys(data.errors)[0] && !Object.keys(data.results)[0]) throw new Error(JSON.stringify(data.errors))
+document.getElementById('ip-results').innerHTML = toolsFormat(data.results);
+} catch (error) {
+document.getElementById('ip-results').innerHTML = `<br/><div class="error">${error}</div>`;
+} finally {
+button.value = 'Search';
+}
+}
+const toolsHashLookup = async () => {
+const button = document.getElementById('hash-button');
+button.value = 'Searching...';
+const url = `${API_BASE}/tools/hash-lookup`;
+const terms = document.getElementById('hashes').value.split(',').map(s => s.trim()).filter(Boolean);
+try {
+const data = await fetchAPIData(url, { terms: terms, types: ['hash'], group_by: "hash" });
+if(Object.keys(data.errors)[0] && !Object.keys(data.results)[0]) throw new Error(JSON.stringify(data.errors))
+document.getElementById('hash-results').innerHTML = toolsFormat(data.results);
+} catch (error) {
+document.getElementById('hash-results').innerHTML = `<br/><div class="error">${error}</div>`;
+} finally {
+button.value = 'Search';
+}
+}
+const toolsPasswordLookup = async () => {
+const button = document.getElementById('password-button');
+button.value = 'Searching...';
+const url = `${API_BASE}/tools/hash-lookup`;
+const terms = document.getElementById('passwords').value.split(',').map(s => s.trim()).filter(Boolean);
+try {
+const data = await fetchAPIData(url, { terms: terms, types: ['password'], group_by: "password" });
+if(Object.keys(data.errors)[0] && !Object.keys(data.results)[0]) throw new Error(JSON.stringify(data.errors))
+document.getElementById('password-results').innerHTML = toolsFormat(data.results);
+} catch (error) {
+document.getElementById('password-results').innerHTML = `<br/><div class="error">${error}</div>`;
+} finally {
+button.value = 'Search';
+}
+}
+const toolsComboLookup = async () => {
+const button = document.getElementById('combo-button');
+button.value = 'Searching...';
+const url = `${API_BASE}/temp/combolists/${encodeURIComponent(document.getElementById('combouser').value)}`;
+try {
+const data = await fetchAPIData(url);
+document.getElementById('combo-results').innerHTML = toolsFormat(data.result);
+} catch (error) {
+document.getElementById('combo-results').innerHTML = `<br/><div class="error">${error}</div>`;
+} finally {
+button.value = 'Search';
+}
+}
+</script><script src="/app.js?cv=28"></script>
+</body>
+</html>
